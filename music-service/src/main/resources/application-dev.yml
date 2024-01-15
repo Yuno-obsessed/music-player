@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://musicPlayer.postgres:5432/audio_service
+    username: sanity
+    password: wordpass
+  cloud:
+    consul:
+      host: musicPlayer.consul
+      port: 8500
+  kafka:
+    bootstrap-servers: musicPlayer.kafka:29092
+

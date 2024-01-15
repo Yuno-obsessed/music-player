@@ -1,0 +1,11 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/audio_service
+    username: sanity
+    password: wordpass
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+  kafka:
+    bootstrap-servers: localhost:29092

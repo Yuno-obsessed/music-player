@@ -1,0 +1,99 @@
+syntax = "proto3";
+
+package sanity.nil.generated.grpc;
+
+option java_multiple_files = true;
+option java_package = "sanity.nil.generated.grpc";
+option java_outer_classname = "MusicServiceProto";
+
+service MusicService {
+  rpc Create(CreateSong) returns (CreatedSong) { };
+//  rpc AddToPlaylist()
+  rpc findByID (SongID) returns (SongQuery) { };
+  rpc findByName (SongName) returns (stream SongItemQuery) { };
+  rpc findByAuthor (AuthorID) returns (stream SongItemQuery) { };
+  rpc findByAlbum (AlbumID) returns (stream SongItemQuery) { };
+  rpc findByPlaylist (PlaylistID) returns (stream SongItemQuery) { };
+}
+
+message SongItemQuery {
+  SongID id = 1;
+  string title = 2;
+//  string url = 3;
+  int32 duration = 4;
+//  string image_url = 5;
+//  SongAuthorItemQuery author = 6;
+//  SongAlbumItemQuery album = 7;
+};
+
+message SongQuery {
+  SongID id = 1;
+  string title = 2;
+  int32 duration = 3;
+  bool saved = 4;
+  bool playable = 5;
+//  string share_url = 6;
+//  string image_url = 7;
+  int64 play_count = 8;
+  string album_name = 9;
+  repeated Genre genres = 10;
+  SongAuthorQuery author = 11;
+  // SongAlbumQuery
+}
+
+message CreateSong {
+  string title = 1;
+  string album_id = 2;
+  string author_id = 3;
+  int32 duration = 4;
+  repeated GenreID genres = 5;
+}
+
+message CreatedSong {
+   string id = 1;
+}
+
+message SongAuthorQuery {
+  string id = 1;
+  string url = 2;
+  string image_url = 3;
+  // SongReleases ...
+}
+
+message SongAuthorItemQuery {
+  string name = 1;
+  string url = 2;
+};
+
+message SongAlbumItemQuery {
+  string name = 1;
+  string url = 2;
+};
+
+message Genre {
+  string name = 1;
+}
+
+message GenreID {
+  int32 id = 1;
+}
+
+message SongName {
+  string name = 1;
+};
+
+message AuthorID {
+  string id = 1;
+};
+
+message AlbumID {
+  string id = 1;
+};
+
+message PlaylistID {
+  string id = 1;
+};
+
+message SongID {
+  string id = 1;
+};

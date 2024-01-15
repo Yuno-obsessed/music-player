@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+option go_package = "./servicespb";
+
+service UserService {
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+  rpc GetUser(GetUserRequest) returns (GetUserResponse);
+}
+
+message CreateUserRequest {
+  string username = 1;
+  string password = 2;
+  repeated Role roles = 3;
+}
+
+message CreateUserResponse {
+  string id = 1;
+}
+
+message GetUserRequest {
+  string id = 1;
+}
+
+message GetUserResponse {
+  string username = 1;
+  string password = 2;
+  repeated GetRole roles = 3;
+}
+
+message Role {
+  int32 role_id = 1;
+}
+
+message GetRole {
+  string type = 1;
+}

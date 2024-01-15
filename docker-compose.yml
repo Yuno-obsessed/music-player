@@ -1,0 +1,142 @@
+version: "3.9"
+services:
+  minio:
+    container_name: musicPlayer.minio
+    image: quay.io/minio/minio:latest
+    command: server --address ":9000" --console-address ":9001" /data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=sanity
+      - MINIO_ROOT_PASSWORD=sanity2024
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    volumes:
+      - minio.data:/data
+
+  postgres:
+    container_name: musicPlayer.postgres
+    image: postgres:latest
+    restart: on-failure
+    environment:
+      POSTGRES_DB: audio_service
+      POSTGRES_USER: sanity
+      POSTGRES_PASSWORD: wordpass
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres.data:/var/lib/postgresql/users:rw
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
+      interval: 10s
+      timeout: 60s
+      retries: 5
+      start_period: 10s
+
+  consul:
+    container_name: musicPlayer.consul
+    image: consul:1.15
+    ports:
+      - "8500:8500"
+      - "8600:8600/tcp"
+      - "8600:8600/udp"
+    restart: on-failure
+
+  zookeeper:
+    container_name: musicPlayer.zookeeper
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  kafka:
+    container_name: musicPlayer.kafka
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    ports:
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  grafana:
+    container_name: musicPlayer.grafana
+    image: grafana/grafana:9.5.2
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - ./config/grafana/provisioning:/etc/grafana/provisioning:rw
+      - grafana.data:/var/lib/grafana:rw
+    environment:
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - VIRTUAL_HOST=musicPlayer.grafana
+      - NETWORK_ACCESS=internal
+      - VIRTUAL_PORT=3000
+
+  prometheus:
+    container_name: musicPlayer.prometheus
+    image: prom/prometheus:v2.36.2
+    ports:
+      - "9070:9090"
+    volumes:
+      - ./config/prometheus/:/etc/prometheus:ro
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yaml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+
+  music-service:
+    container_name: musicPlayer.musicService
+    depends_on:
+      minio:
+        condition: service_started
+      postgres:
+        condition: service_started
+      kafka:
+        condition: service_started
+      consul:
+        condition: service_started
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: music-service/Dockerfile
+    ports:
+      - "9080:9080"
+      - "7080:7080"
+
+
+  statistics-service:
+    container_name: musicPlayer.statisticsService
+    depends_on:
+      minio:
+        condition: service_started
+      postgres:
+        condition: service_started
+      kafka:
+        condition: service_started
+      consul:
+        condition: service_started
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: statistics-service/Dockerfile
+    ports:
+      - "9081:9081"
+
+volumes:
+  minio.data: { }
+  postgres.data: { }
+  grafana.data: { }

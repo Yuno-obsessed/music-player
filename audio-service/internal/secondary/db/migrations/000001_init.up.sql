@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS audio(
+    audio_id VARCHAR(50) PRIMARY KEY,
+    audio_name VARCHAR(200) NOT NULL,
+    bucket VARCHAR(80) NOT NULL
+);
