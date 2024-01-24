@@ -44,7 +44,7 @@ message SongQuery {
 message CreateSong {
   string title = 1;
   string album_id = 2;
-  string author_id = 3;
+  repeated AuthorID authors = 3;
   int32 duration = 4;
   repeated GenreID genres = 5;
 }

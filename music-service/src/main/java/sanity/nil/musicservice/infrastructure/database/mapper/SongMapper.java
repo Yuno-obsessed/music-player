@@ -5,13 +5,12 @@ import sanity.nil.generated.grpc.*;
 import sanity.nil.musicservice.application.dto.command.CreateSongCommandDTO;
 import sanity.nil.musicservice.application.dto.query.SongItemQueryDTO;
 import sanity.nil.musicservice.application.dto.query.SongQueryDTO;
+import sanity.nil.musicservice.infrastructure.database.models.AlbumModel;
+import sanity.nil.musicservice.infrastructure.database.models.AuthorModel;
 import sanity.nil.musicservice.infrastructure.database.models.GenreModel;
 import sanity.nil.musicservice.infrastructure.database.models.SongModel;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class SongMapper {
 
@@ -48,18 +47,20 @@ public class SongMapper {
 
     public static SongQueryDTO convertSongModelToQuery(SongModel model) {
         return new SongQueryDTO(model.getId(), model.getTitle(),
-                model.getGenres().stream().map(GenreModel::getName).toList(), "album",
+                model.getGenres().stream().map(GenreModel::getName).toList(), model.getAlbum().getTitle(),
                 model.getDuration(), true, true, model.getPlays());
     }
 
-    public static SongModel convertCreateCommandToModel(CreateSongCommandDTO dto, List<GenreModel> genres) {
-        return new SongModel(dto.title, genres, 0L, dto.duration);
+    public static SongModel convertCreateCommandToModel(CreateSongCommandDTO dto, List<GenreModel> genres,
+                                                        AlbumModel album, List<AuthorModel> authors) {
+        return new SongModel(dto.title, 0L, dto.duration, new HashSet<>(genres), album, new HashSet<>(authors));
     }
 
     public static CreateSongCommandDTO convertPresentationToCreateCommand(CreateSong createSong) {
         List<Integer> genres = createSong.getGenresList().stream().map(GenreID::getId).toList();
+        List<UUID> authors = createSong.getAuthorsList().stream().map(AuthorID::getId).map(UUID::fromString).toList();
         return new CreateSongCommandDTO(createSong.getTitle(), UUID.fromString(createSong.getAlbumId()),
-                UUID.fromString(createSong.getAuthorId()), genres, createSong.getDuration());
+                authors, genres, createSong.getDuration());
     }
 
     public static SongItemQueryDTO convertSongModelToSongItem(SongModel model) {

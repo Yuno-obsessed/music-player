@@ -6,6 +6,6 @@ type FiberGroup struct {
 	fiber.Router
 }
 
-func NewFiberGroup(engine Engine, middlewares Middlewares) FiberGroup {
-	return FiberGroup{Router: engine.app.Group("/api/v1/audio", middlewares...)}
+func NewFiberGroup(middleware Middleware, handlers Handlers) FiberGroup {
+	return FiberGroup{Router: middleware.Group("/api/v1/audio", handlers...)}
 }

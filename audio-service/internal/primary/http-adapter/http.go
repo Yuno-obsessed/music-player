@@ -11,7 +11,8 @@ var Module = fx.Options(
 		NewEngine,
 		NewUploadHandler,
 		NewGetSongHandler,
-		NewMiddlewares,
+		NewHandlers,
+		NewMiddleware,
 		NewFiberGroup,
 		fx.Annotate(
 			NewAudioRouter,

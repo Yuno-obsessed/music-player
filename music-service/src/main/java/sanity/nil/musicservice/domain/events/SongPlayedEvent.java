@@ -1,5 +1,7 @@
 package sanity.nil.musicservice.domain.events;
 
+import sanity.nil.musicservice.domain.consts.EventType;
+
 import java.util.UUID;
 
 public class SongPlayedEvent implements Event {
@@ -8,12 +10,16 @@ public class SongPlayedEvent implements Event {
     private UUID songID;
 
     public SongPlayedEvent(UUID songID) {
-        this.baseEvent = new BaseEvent("SongPlayed");
+        this.baseEvent = new BaseEvent(EventType.SONG_PLAYED);
         this.songID = songID;
     }
 
     @Override
-    public String getEventType() {
+    public void process() {
+    }
+
+    @Override
+    public EventType getEventType() {
         return baseEvent.getEventType();
     }
 

@@ -3,6 +3,7 @@ server:
 grpc:
   server:
     port: 9080
+    host: localhost
 spring:
   application:
     name: music-service

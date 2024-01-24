@@ -12,7 +12,7 @@ public class CreateSongCommandDTO {
 
     public String title;
     public UUID albumID;
-    public UUID authorID;
+    public List<UUID> authors;
     public List<Integer> genres;
     public Integer duration;
 }

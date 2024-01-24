@@ -14,4 +14,8 @@ public class Song {
         this.title = title;
         this.genres = genres;
     }
+
+    public void processSongCreated() {
+
+    }
 }

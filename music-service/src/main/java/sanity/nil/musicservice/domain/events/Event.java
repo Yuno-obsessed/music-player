@@ -1,10 +1,14 @@
 package sanity.nil.musicservice.domain.events;
 
+import sanity.nil.musicservice.domain.consts.EventType;
+
 import java.util.UUID;
 
 public interface Event {
 
-    String getEventType();
+    EventType getEventType();
 
     UUID getEventAggregateID();
+
+    void process();
 }

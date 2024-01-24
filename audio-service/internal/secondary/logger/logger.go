@@ -17,27 +17,22 @@ func (l *Logger) Error(err error) {
 	l.Errorln(err)
 }
 
-var (
-	globalLogger *Logger
-	zapLogger    *zap.Logger
-)
-
 func NewLogger() *Logger {
-	if globalLogger == nil {
-		logger := newLogger()
-		globalLogger = &logger
-	}
-	return globalLogger
-}
-
-func newLogger() Logger {
 	var zapConfig zap.Config
 	zapConfig = zap.NewDevelopmentConfig()
-	zapConfig.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
-	zapLogger, _ = zapConfig.Build()
+	encoderConfig := zap.NewDevelopmentEncoderConfig()
+	zapConfig.EncoderConfig = encoderConfig
+	zapConfig.EncoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
+	zapConfig.EncoderConfig.EncodeCaller = nil
+	zapConfig.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	zapConfig.OutputPaths = []string{"stdout"}
+	zapConfig.ErrorOutputPaths = []string{"stderr"}
+	zapConfig.Level.SetLevel(zapcore.DebugLevel)
+	zapLogger, _ := zapConfig.Build()
 	logger := newSugaredLogger(zapLogger)
-	return *logger
+	return logger
 }
+
 func newSugaredLogger(logger *zap.Logger) *Logger {
 	return &Logger{
 		SugaredLogger: logger.Sugar(),

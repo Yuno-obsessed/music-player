@@ -29,7 +29,7 @@ func NewUploadSongCommand(
 
 func (c *UploadSongCommand) Handle(command UploadSongCommandDTO) (dto.UploadSongDTO, error) {
 
-	bucketName := "audio-" + command.Genre
+	bucketName := "audio." + command.Genre
 	uow := c.UoWManager.GetUoW()
 	tx, err := uow.Begin()
 	if err != nil {
@@ -38,8 +38,8 @@ func (c *UploadSongCommand) Handle(command UploadSongCommandDTO) (dto.UploadSong
 
 	err = c.Storage.UploadFile(bucketName, command.Title, command.File, command.Size)
 	if err != nil {
-		err := uow.Rollback()
-		if err != nil {
+		txErr := uow.Rollback()
+		if txErr != nil {
 			return dto.UploadSongDTO{}, err
 		}
 		return dto.UploadSongDTO{}, err
@@ -50,13 +50,25 @@ func (c *UploadSongCommand) Handle(command UploadSongCommandDTO) (dto.UploadSong
 
 	err = c.AudioRepo.Create(audio, tx)
 	if err != nil {
+		txErr := uow.Rollback()
+		if txErr != nil {
+			return dto.UploadSongDTO{}, err
+		}
 		return dto.UploadSongDTO{}, err
 	}
 	c.Logger.Debug("Audio with id: " + audio.AudioID.UUID.String() + " saved successfully")
 
-	if err := uow.Commit(); err != nil {
+	if err = uow.Commit(); err != nil {
 		return dto.UploadSongDTO{}, err
 	}
+
+	defer func() {
+		if err != nil {
+			c.Logger.Error(err)
+		} else {
+			c.Logger.Debug("Committed successfully")
+		}
+	}()
 
 	return dto.UploadSongDTO{Title: command.Title}, nil
 }

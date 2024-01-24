@@ -25,7 +25,7 @@ func NewConfig() Config {
 
 func (conf *Config) GetClient() *minio.Client {
 	minioClient, err := minio.New(conf.Host+conf.Port, &minio.Options{
-		Creds:  credentials.NewStaticV4(conf.AccessKey, conf.AccessKey, ""),
+		Creds:  credentials.NewStaticV4(conf.AccessKey, conf.SecretKey, ""),
 		Secure: false,
 	})
 	if err != nil {

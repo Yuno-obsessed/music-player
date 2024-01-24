@@ -33,20 +33,30 @@ func (q *GetSongCommand) Handle(query GetSongQueryDTO) (dto.AudioQuery, error) {
 	if err != nil {
 		return dto.AudioQuery{}, err
 	}
+
 	audio, err := q.AudioRepo.GetByID(query.ID, tx)
 	if err != nil {
+		txErr := uow.Rollback()
+		if txErr != nil {
+			return dto.AudioQuery{}, txErr
+		}
 		return dto.AudioQuery{}, err
 	}
-	q.Logger.Debug("Audio with id: " + audio.AudioID.UUID.String() + " successfully saved.")
+	q.Logger.Debug("Audio with id: " + audio.AudioID.UUID.String() + " retrieved.")
 
-	if err := uow.Commit(); err != nil {
+	if err = uow.Commit(); err != nil {
 		return dto.AudioQuery{}, err
 	}
 
-	url, err := q.Storage.GetPresignedURL(audio.Title, audio.Bucket)
+	url, err := q.Storage.GetPresignedURL(audio.Bucket, audio.Title)
 	if err != nil {
+		txErr := uow.Rollback()
+		if txErr != nil {
+			return dto.AudioQuery{}, txErr
+		}
 		return dto.AudioQuery{}, err
 	}
+
 	q.Logger.Debug("Audio url extracted: " + url)
 
 	return dto.AudioQuery{

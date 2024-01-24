@@ -1,4 +1,4 @@
-include config/.env
+include .env
 migrate-new:
 	migrate create -ext sql -dir ${db.migration_path} -seq init
 migrate-up:

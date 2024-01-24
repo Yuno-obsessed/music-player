@@ -15,10 +15,11 @@ func NewAudioServices(
 	repo persistence.AudioRepo,
 	storage persistence.Storage,
 	manager persistence.UoWManager,
+	logger persistence.Logger,
 ) *AudioServices {
 
-	uploadSong := commands.NewUploadSongCommand(repo, storage, manager)
-	getSong := queries.NewGetSongCommand(repo, storage, manager)
+	uploadSong := commands.NewUploadSongCommand(repo, storage, manager, logger)
+	getSong := queries.NewGetSongCommand(repo, storage, manager, logger)
 	return &AudioServices{
 		Commands: commands.NewAudioCommands(uploadSong),
 		Queries:  queries.NewAudioQueries(getSong),

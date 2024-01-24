@@ -5,6 +5,7 @@ import (
 	"audio-service/internal/application/commands"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+	"strconv"
 	"strings"
 )
 
@@ -23,30 +24,36 @@ func (h *UploadHandler) Handle(c *fiber.Ctx) error {
 	}
 
 	title := c.FormValue("title", uuid.New().String()[:10])
-	genre := c.FormValue("genre")
+	qualityForm := c.FormValue("quality")
+	quality, err := strconv.Atoi(qualityForm)
+	if err != nil {
+		return err
+	}
+	idForm := c.FormValue("id")
+	id, err := uuid.Parse(idForm)
+	if err != nil {
+		return err
+	}
 
 	file, err := formFile.Open()
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error()},
-		)
+		return err
 	}
 	defer file.Close()
 
 	objectName := title + formFile.Filename[strings.Index(formFile.Filename, "."):]
 
 	dto := commands.UploadSongCommandDTO{
-		Title: objectName,
-		File:  file,
-		Genre: genre,
-		Size:  formFile.Size,
+		Id:      id,
+		Quality: int16(quality),
+		Title:   objectName,
+		File:    file,
+		Size:    formFile.Size,
 	}
 
 	response, err := h.Commands.UploadSongCommand.Handle(dto)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": err.Error()},
-		)
+		return err
 	}
 
 	return c.Status(fiber.StatusOK).JSON(response)

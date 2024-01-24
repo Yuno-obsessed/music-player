@@ -1,14 +1,15 @@
 package sanity.nil.musicservice.infrastructure.database.models;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.databind.ser.Serializers;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -17,9 +18,13 @@ import java.util.UUID;
 @Setter
 @Table(name = "playlists")
 @Entity
-public class PlaylistModel {
+public class PlaylistModel extends BaseModel {
 
-    @Id
-    @Column(name = "id")
-    private UUID id;
+    @Column(name = "user_id")
+    private UUID userID;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "playlist_id")
+    private Set<SongModel> songs = new HashSet<>();
+
 }

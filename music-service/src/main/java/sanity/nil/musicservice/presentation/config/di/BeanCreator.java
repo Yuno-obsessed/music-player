@@ -24,9 +24,7 @@ import sanity.nil.musicservice.application.service.SongCommandService;
 import sanity.nil.musicservice.application.service.SongQueryService;
 import sanity.nil.musicservice.infrastructure.database.impl.OutboxDAOImpl;
 import sanity.nil.musicservice.infrastructure.database.impl.SongDAOImpl;
-import sanity.nil.musicservice.infrastructure.database.models.orm.GenreORM;
-import sanity.nil.musicservice.infrastructure.database.models.orm.OutboxORM;
-import sanity.nil.musicservice.infrastructure.database.models.orm.SongORM;
+import sanity.nil.musicservice.infrastructure.database.models.orm.*;
 import sanity.nil.musicservice.infrastructure.messageBroker.adapter.MessageBrokerImpl;
 
 import javax.sql.DataSource;
@@ -66,13 +64,13 @@ public class BeanCreator {
     }
 
     @Bean
-    public SongReader songReader(SongORM songORM, GenreORM genreORM) {
-        return new SongDAOImpl(songORM, genreORM);
+    public SongReader songReader(SongORM songORM, GenreORM genreORM, AlbumORM albumORM, AuthorORM authorORM) {
+        return new SongDAOImpl(songORM, genreORM, authorORM, albumORM);
     }
 
     @Bean
-    public SongDAO songDAO(SongORM songORM, GenreORM genreORM) {
-        return new SongDAOImpl(songORM, genreORM);
+    public SongDAO songDAO(SongORM songORM, GenreORM genreORM, AlbumORM albumORM, AuthorORM authorORM) {
+        return new SongDAOImpl(songORM, genreORM, authorORM, albumORM);
     }
 
     @Bean

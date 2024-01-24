@@ -2,7 +2,6 @@ package storage
 
 import (
 	"context"
-	"fmt"
 	"github.com/minio/minio-go/v7"
 	"io"
 	"time"
@@ -25,17 +24,16 @@ func (m *MinioInstance) UploadFile(bucketName string, objectName string, reader 
 		return err
 	}
 	if !exists {
-		err := m.client.MakeBucket(context.Background(), bucketName, minio.MakeBucketOptions{Region: "us-east-1", ObjectLocking: false})
+		err = m.client.MakeBucket(context.Background(), bucketName, minio.MakeBucketOptions{Region: "us-east-1", ObjectLocking: false})
 		if err != nil {
 			return err
 		}
 	}
-	info, err := m.client.PutObject(context.Background(), bucketName, objectName, reader, size, minio.PutObjectOptions{})
+	_, err = m.client.PutObject(context.Background(), bucketName, objectName, reader, size, minio.PutObjectOptions{})
 	if err != nil {
 		return err
 	}
 
-	fmt.Println(info.Bucket, info.VersionID, info.Size)
 	return nil
 }
 
